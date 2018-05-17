@@ -10,7 +10,11 @@ Authors@R: c(person("Martin", "Bruckner", role = c("aut", "cre"), email = "marti
         person("Victor", "Maus", role = "ctb",  email = "victor.maus@wu.ac.at", comment = c(ORCID = "0000-0002-7385-4723")),
         person("Stefan", "Giljum", role = "ths", email = "stefan.giljum@wu.ac.at", comment = c(ORCID = "0000-0002-4719-5867")))
 Depends:
-  R (>= 3.3.0)
+        R (>= 3.3.0)
+Imports:
+        utils,
+	      openxlsx,
+        comtradr
 License: GPL-3 | file LICENSE
 URL: https://github.com/fineprint-global/fabio/
 BugReports: https://github.com/fineprint-global/fabio/issues/
