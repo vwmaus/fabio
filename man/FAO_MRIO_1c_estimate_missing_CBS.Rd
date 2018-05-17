@@ -4,7 +4,13 @@
 \alias{FAO_MRIO_1c_estimate_missing_CBS}
 \title{FAO_MRIO_1c_estimate_missing_CBS}
 \usage{
-FAO_MRIO_1c_estimate_missing_CBS()
+FAO_MRIO_1c_estimate_missing_CBS(...)
+}
+\arguments{
+\item{...}{some argument}
+}
+\value{
+returns some data
 }
 \description{
 Build MRIO table based on Faostat commodity balance sheets and trade data part 1c: estimate missing CBS
