@@ -19,7 +19,8 @@ Imports:
         stats,
         Matrix,
         reshape2,
-        MASS
+        MASS,
+        rmatio
 License: GPL-3 | file LICENSE
 URL: https://github.com/fineprint-global/fabio/
 BugReports: https://github.com/fineprint-global/fabio/issues/
