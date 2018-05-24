@@ -1,3 +1,4 @@
+#' @importFrom dplyr group_by summarise
 #' @importFrom utils read.csv read.csv2 packageDescription
 #' @importFrom openxlsx read.xlsx
 #' @importFrom comtradr ct_register_token ct_search
