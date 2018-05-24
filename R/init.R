@@ -3,6 +3,8 @@
 #' @importFrom comtradr ct_register_token ct_search
 #' @importFrom data.table data.table as.data.table dcast melt
 #' @importFrom stats aggregate
+#' @importFrom Matrix bdiag
+#' @importFrom reshape2 dcast melt
 NULL
 
 .onAttach = function(lib, pkg){
