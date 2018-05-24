@@ -7,6 +7,7 @@
 #' @importFrom reshape2 dcast melt
 #' @importFrom MASS ginv
 #' @importFrom rmatio write.mat
+#' @importFrom xlsx write.xlsx
 NULL
 
 .onAttach = function(lib, pkg){
