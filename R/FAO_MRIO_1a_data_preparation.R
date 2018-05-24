@@ -23,7 +23,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   # Note: without Item.Code this line asks for a fun.aggregate, because there is one element ('eggs') which is included twice in the data set with two different item codes
   names(CBS_raw)[1:2] <- c("Country.Code","Country")
   CBS <- CBS_raw[CBS_raw$Country.Code<5000,]  # Country.Code >= 5000 = country groups, e.g. 'Africa'
-  CBS <- as.data.frame(data.table::dcast(data.table::as.data.table(CBS), Country.Code + Country + Item.Code + Item + Year ~ Element, value.var="Value"))
+  CBS <- as.data.frame(reshape2::dcast(data.table::as.data.table(CBS), Country.Code + Country + Item.Code + Item + Year ~ Element, value.var="Value"))
   CBS[is.na(CBS)] <- 0
   names(CBS) <- c(names(CBS)[1:5],"TotalSupply","Exports","Feed","Food","Imports","OtherUses","Processing","Production","Seed",
                   "StockVariation","Waste")
@@ -191,7 +191,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   #-----------------------------
   # cast data.frame to get the different elements in columns
   #-----------------------------
-  Forestry <- data.table::dcast(Forestry, Country.Code + Country + Item.Code + Item + Year ~ Element, value.var="Value")
+  Forestry <- reshape2::dcast(Forestry, Country.Code + Country + Item.Code + Item + Year ~ Element, value.var="Value")
   Forestry[is.na(Forestry)] <- 0
   
   # rename Countries (i.e. Czechia and Netherlands Antilles)
@@ -263,7 +263,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   #-----------------------------
   # cast data.frame to get the different elements in columns
   #-----------------------------
-  ForTrade <- data.table::dcast(ForTrade, Reporter.Country.Code + Reporter.Countries + Partner.Country.Code + Partner.Countries + Item.Code + 
+  ForTrade <- reshape2::dcast(ForTrade, Reporter.Country.Code + Reporter.Countries + Partner.Country.Code + Partner.Countries + Item.Code + 
                       Item + Year ~ Element, value.var="Value")
   ForTrade[is.na(ForTrade)] <- 0
   
@@ -442,7 +442,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   # prepare IEA data
   ProdEthanol_IEA <- ProdEthanol_IEA[-1,-2]
   names(ProdEthanol_IEA)[1] <- "Country.IEA"
-  ProdEthanol_IEA <- data.table::melt(ProdEthanol_IEA, "Country.IEA", variable.names="Year", value.name = "Production")
+  ProdEthanol_IEA <- reshape2::melt(ProdEthanol_IEA, "Country.IEA", variable.names="Year", value.name = "Production")
   ProdEthanol_IEA$Production <- as.numeric(ProdEthanol_IEA$Production)
   ProdEthanol_IEA <- ProdEthanol_IEA[is.finite(ProdEthanol_IEA$Production) & ProdEthanol_IEA$Production > 0,]
   names(ProdEthanol_IEA)[2] <- "Year"
@@ -459,7 +459,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   # prepare EIA data
   ProdEthanol_EIA <- ProdEthanol_EIA[-(1:3),-2]
   names(ProdEthanol_EIA)[1] <- "Country.EIA"
-  ProdEthanol_EIA <- data.table::melt(ProdEthanol_EIA, "Country.EIA", variable.names="Year", value.name = "Production")
+  ProdEthanol_EIA <- reshape2::melt(ProdEthanol_EIA, "Country.EIA", variable.names="Year", value.name = "Production")
   ProdEthanol_EIA$Production <- as.numeric(ProdEthanol_EIA$Production)
   ProdEthanol_EIA <- ProdEthanol_EIA[is.finite(ProdEthanol_EIA$Production),]
   names(ProdEthanol_EIA)[2] <- "Year"
@@ -531,7 +531,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   comtrade$Reporter.Country <- as.character(comtrade$Reporter.Country)
   comtrade$Partner.Country <- as.character(comtrade$Partner.Country)
   # unique(comtrade[,c(7,9)])
-  comtrade <- data.table::dcast(comtrade, Reporter.Country.Code + Reporter.Country + Partner.Country.Code + Partner.Country + Year + Element + 
+  comtrade <- reshape2::dcast(comtrade, Reporter.Country.Code + Reporter.Country + Partner.Country.Code + Partner.Country + Year + Element + 
                       commodity_code + commodity + trade_value_usd ~ qty_unit, value.var="alt_qty_unit")
   comtrade$`No Quantity` <- NULL
   comtrade$`Number of items` <- NULL
