@@ -82,7 +82,7 @@ FAO_MRIO_1f_BTD_balancing <- function(...){
     BTD_bal$Value[BTD_bal$From.Country.Code==999 & BTD_bal$Value==0] <- 1
     BTD_bal$Value[BTD_bal$To.Country.Code==999 & BTD_bal$Value==0] <- 1
     # cast list into matrix
-    BTD_bal <- data.table::dcast(as.data.table(BTD_bal), From.Country.Code + From.Country + Item.Code + Item + Year ~ To.Country.Code + To.Country, fun=sum, value.var = "Value")
+    BTD_bal <- reshape2::dcast(as.data.table(BTD_bal), From.Country.Code + From.Country + Item.Code + Item + Year ~ To.Country.Code + To.Country, fun=sum, value.var = "Value")
     BTD_bal <- as.data.frame(BTD_bal)
     BTD_bal[,-(1:5)][! is.finite(BTD_bal[,-(1:5)])] <- 0
     BTD_bal$ID <- paste(BTD_bal$From.Country.Code,BTD_bal$Item.Code,BTD_bal$Year, sep = ".")
@@ -92,7 +92,7 @@ FAO_MRIO_1f_BTD_balancing <- function(...){
     # Integrate target imports into BTD_est
     BTD_est <- rbind(BTD_est[,1:9], temp)
     # cast list into matrix
-    BTD_est <- data.table::dcast(as.data.table(BTD_est), From.Country.Code + From.Country + Item.Code + Item + Year ~ To.Country.Code + To.Country, fun=sum, value.var = "Value")
+    BTD_est <- reshape2::dcast(as.data.table(BTD_est), From.Country.Code + From.Country + Item.Code + Item + Year ~ To.Country.Code + To.Country, fun=sum, value.var = "Value")
     BTD_est <- as.data.frame(BTD_est)
     BTD_est[,-(1:5)][! is.finite(BTD_est[,-(1:5)])] <- 0
     BTD_est$ID <- paste(BTD_est$From.Country.Code,BTD_est$Item.Code,BTD_est$Year, sep = ".")
@@ -214,7 +214,7 @@ FAO_MRIO_1f_BTD_balancing <- function(...){
     #-------------------------------------------------------------------------------------------
     # 3. Convert the balanced trade matrix into list
     #-------------------------------------------------------------------------------------------
-    BTD <- data.table::melt(BTD_bal[,1:(ncol(BTD_bal)-2)], id=c("From.Country.Code","From.Country","Item.Code","Item","Year"), variable.name="To.Country", value.name = "Value")
+    BTD <- reshape2::melt(BTD_bal[,1:(ncol(BTD_bal)-2)], id=c("From.Country.Code","From.Country","Item.Code","Item","Year"), variable.name="To.Country", value.name = "Value")
     BTD$Value <- as.numeric(BTD$Value)
     BTD$Item <- as.character(BTD$Item)
     BTD$To.Country <- as.character(BTD$To.Country)

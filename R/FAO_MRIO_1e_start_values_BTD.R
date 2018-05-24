@@ -67,8 +67,8 @@ FAO_MRIO_1e_start_values_BTD <- function(...){
     BTD_est_ex <- BTD_start
     BTD_est_im <- BTD_start
     
-    imp <- data.table::dcast(CBS[,-7], Item.Code + Item + Year ~ Country.Code, value.var = "Imports")
-    exp <- data.table::dcast(CBS[,-6], Item.Code + Item + Year ~ Country.Code, value.var = "Exports")
+    imp <- reshape2::dcast(CBS[,-7], Item.Code + Item + Year ~ Country.Code, value.var = "Imports")
+    exp <- reshape2::dcast(CBS[,-6], Item.Code + Item + Year ~ Country.Code, value.var = "Exports")
     
     # estimate BTD
     region=231
@@ -77,7 +77,7 @@ FAO_MRIO_1e_start_values_BTD <- function(...){
       temp <- imp
       temp[,as.character(region)] <- 0
       temp[,-(1:3)] <- temp[,-(1:3)] / rowSums(temp[,-(1:3)]) * exp[,as.character(region)]
-      temp <- data.table::melt(as.data.table(temp), id=1:3, measure=4:ncol(temp))
+      temp <- reshape2::melt(as.data.table(temp), id=1:3, measure=4:ncol(temp))
       temp$ID <- paste(region,temp$variable,temp$Item.Code, sep = ".")
       BTD_est_ex$Value[BTD_est_im$From.Country.Code==region] <- 
         temp$value[match(BTD_est_ex$ID[BTD_est_im$From.Country.Code==region], temp$ID)]
@@ -86,7 +86,7 @@ FAO_MRIO_1e_start_values_BTD <- function(...){
       temp <- exp
       temp[,as.character(region)] <- 0
       temp[,-(1:3)] <- temp[,-(1:3)] / rowSums(temp[,-(1:3)]) * imp[,as.character(region)]
-      temp <- data.table::melt(as.data.table(temp), id=1:3, measure=4:ncol(temp))
+      temp <- reshape2::melt(as.data.table(temp), id=1:3, measure=4:ncol(temp))
       temp$ID <- paste(temp$variable,region,temp$Item.Code, sep = ".")
       BTD_est_im$Value[BTD_est_im$To.Country.Code==region] <- 
         temp$value[match(BTD_est_im$ID[BTD_est_im$To.Country.Code==region], temp$ID)]
