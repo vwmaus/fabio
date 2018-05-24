@@ -5,6 +5,7 @@
 #' @importFrom stats aggregate
 #' @importFrom Matrix bdiag
 #' @importFrom reshape2 dcast melt
+#' @importFrom MASS ginv
 NULL
 
 .onAttach = function(lib, pkg){
