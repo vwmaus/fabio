@@ -532,7 +532,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   comtrade$Partner.Country <- as.character(comtrade$Partner.Country)
   # unique(comtrade[,c(7,9)])
   comtrade <- reshape2::dcast(comtrade, Reporter.Country.Code + Reporter.Country + Partner.Country.Code + Partner.Country + Year + Element + 
-                      commodity_code + commodity + trade_value_usd ~ qty_unit, value.var="alt_qty_unit")
+                      commodity_code + commodity + trade_value_usd ~ qty_unit, value.var="qty")
   comtrade$`No Quantity` <- NULL
   comtrade$`Number of items` <- NULL
   names(comtrade)[9:11] <- c("usd","litres","kg")
