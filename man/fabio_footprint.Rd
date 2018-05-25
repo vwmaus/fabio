@@ -4,7 +4,7 @@
 \alias{fabio_footprint}
 \title{fabio footprint}
 \usage{
-fabio_footprint(wd, years, regions = "all")
+fabio_footprint(wd, years, regions_select = "all")
 }
 \arguments{
 \item{...}{some argument}
