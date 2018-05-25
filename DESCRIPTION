@@ -20,11 +20,12 @@ Imports:
         Matrix,
         reshape2,
         MASS,
-        rmatio,
         xlsx,
-        dplyr
+        dplyr,
+        magrittr
 License: GPL-3 | file LICENSE
 URL: https://github.com/fineprint-global/fabio/
 BugReports: https://github.com/fineprint-global/fabio/issues/
 RoxygenNote: 6.0.1
 Encoding: UTF-8
+Suggests: testthat

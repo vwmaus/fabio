@@ -45,17 +45,10 @@ FAO_MRIO_3b_A <- function(...){
     # A[A>1] <- 0.999
     
     save(A, file=paste0("data/yearly/",year,"_A.RData"))
-    rmatio::write.mat(list(A=A), paste0("data/yearly/FABIO matlab/",year,"_A.mat"))
+    #rmatio::write.mat(list(A=A), paste0("data/yearly/FABIO matlab/",year,"_A.mat"))
     
     rm(A); gc()
     
   }
-  
-  
-  year=2013
-  for(year in 1986:2013){
-    print(year)
-    load(file=paste0("data/yearly/",year,"_A.RData"))
-    rmatio::write.mat(list(A=A), paste0("data/yearly/",year,"_A2.mat"), compression = F)
-  }
+
 }
