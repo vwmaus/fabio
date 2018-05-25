@@ -67,23 +67,30 @@ FAO_MRIO_3c_L_series <- function(...){
     # rm(A,A2); gc()
     
     A4 <- A3 %*% A
-    A[!is.finite(A)] <- 0
+    A4[!is.finite(A4)] <- 0
     gc()
     # save(A4, file=paste0("data/yearly/",year,"_A4.RData"))
     # rm(A3); gc()
     
     A5 <- A4 %*% A
-    A[!is.finite(A)] <- 0
+    A5[!is.finite(A5)] <- 0
     gc()
     # save(A5, file=paste0("data/yearly/",year,"_A5.RData"))
     # rm(A4); gc()
     
     A6 <- A5 %*% A
-    A[!is.finite(A)] <- 0
+    A6[!is.finite(A6)] <- 0
     gc()
     # save(A6, file=paste0("data/yearly/",year,"_A6.RData"))
     # rm(A5); gc()
     
+    A7 <- A6 %*% A
+    A7[!is.finite(A7)] <- 0
+    gc()
+    
+    A8 <- A7 %*% A
+    A8[!is.finite(A8)] <- 0
+    gc()
     
     
     # load(file=paste0("data/yearly/",year,"_A.RData"))
@@ -93,11 +100,13 @@ FAO_MRIO_3c_L_series <- function(...){
     # load(file=paste0("data/yearly/",year,"_A5.RData"))
     # load(file=paste0("data/yearly/",year,"_A6.RData"))
     
-    L <- diag(nrow(A))+A+A2+A3+A4+A5+A6
+    L <- diag(nrow(A))+A+A2+A3+A4+A5+A6+A7+A8
+    
+    L <- refill_matrix(L,X)
     
     save(L, file=paste0("data/yearly/",year,"_L.RData"))
     
-    rm(A,A2,A3,A4,A5,A6,L); gc()
+    rm(A,A2,A3,A4,A5,A6,A7,A8,L); gc()
     
   }
   

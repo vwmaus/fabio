@@ -443,7 +443,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   ProdEthanol_IEA <- ProdEthanol_IEA[-1,-2]
   names(ProdEthanol_IEA)[1] <- "Country.IEA"
   ProdEthanol_IEA <- reshape2::melt(ProdEthanol_IEA, "Country.IEA", variable.names="Year", value.name = "Production")
-  ProdEthanol_IEA$Production <- as.numeric(ProdEthanol_IEA$Production)
+  suppressWarnings(ProdEthanol_IEA$Production <- as.numeric(ProdEthanol_IEA$Production))
   ProdEthanol_IEA <- ProdEthanol_IEA[is.finite(ProdEthanol_IEA$Production) & ProdEthanol_IEA$Production > 0,]
   names(ProdEthanol_IEA)[2] <- "Year"
   regfit <- utils::read.csv(file="Regions_IEA-FAO.csv", sep=";")
@@ -460,7 +460,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   ProdEthanol_EIA <- ProdEthanol_EIA[-(1:3),-2]
   names(ProdEthanol_EIA)[1] <- "Country.EIA"
   ProdEthanol_EIA <- reshape2::melt(ProdEthanol_EIA, "Country.EIA", variable.names="Year", value.name = "Production")
-  ProdEthanol_EIA$Production <- as.numeric(ProdEthanol_EIA$Production)
+  suppressWarnings(ProdEthanol_EIA$Production <- as.numeric(ProdEthanol_EIA$Production))
   ProdEthanol_EIA <- ProdEthanol_EIA[is.finite(ProdEthanol_EIA$Production),]
   names(ProdEthanol_EIA)[2] <- "Year"
   regfit <- utils::read.csv(file="Regions_EIA-FAO.csv", sep=";")
@@ -532,7 +532,7 @@ FAO_MRIO_1a_data_preparation <- function(...){
   comtrade$Partner.Country <- as.character(comtrade$Partner.Country)
   # unique(comtrade[,c(7,9)])
   comtrade <- reshape2::dcast(comtrade, Reporter.Country.Code + Reporter.Country + Partner.Country.Code + Partner.Country + Year + Element + 
-                      commodity_code + commodity + trade_value_usd ~ qty_unit, value.var="alt_qty_unit")
+                      commodity_code + commodity + trade_value_usd ~ qty_unit, value.var="qty")
   comtrade$`No Quantity` <- NULL
   comtrade$`Number of items` <- NULL
   names(comtrade)[9:11] <- c("usd","litres","kg")

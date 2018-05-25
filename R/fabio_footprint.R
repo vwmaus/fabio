@@ -1,21 +1,53 @@
-#' @title FAO_MRIO_4b_footprints
+#' @title fabio footprint
 #' @author Sebastian Luckeneder, \email{sebastian.luckeneder@@wu.ac.at}
 #' 
-#' @description Build MRIO table based on Faostat commodity balance sheets and trade data part 4b: calculate footprints
+#' @description Footprint analysis based on fabio model. 
 #' 
 #' @param ... some argument 
 #' 
 #' @return returns some data
 #' 
 #' @export
-FAO_MRIO_4b_footprints <- function(...){
-  # source("http://bioconductor.org/biocLite.R")
-  # biocLite("rhdf5")
-  library(rhdf5)
+fabio_footprint <- function(wd, years, regions_select = "all"){
   
-  rm(list=ls()); gc()
   
-  is.finite.data.frame <- function(x) do.call(cbind, lapply(x, is.finite))
+  library(dplyr)
+  library(data.table)
+  library(reshape2)
+  year <- 2013
+  regions_select <- "EU"
+  
+  # current_wd <- getwd()
+  # setwd(wd)
+  setwd("W:/WU/Projekte/SRU-Projekte/01_Projekte/1305_Bonn BioMRIO/02_FABIO/01_code & data") #temp
+  
+  footprint <- function(region, fd, output){
+    Yreg <- Y[,(4*region-4+fd)]
+    
+    # Calculate Footprint (MP * FD)
+    FP <- as.data.table((t(MP) * Yreg[output!=0])) %>%
+      mutate(ID = rep(items$Com.Code, nrreg)[output!=0])
+    #FP$ID <- items$Com.Code
+    FP <- as.data.frame(as.data.table(FP)[, lapply(.SD, sum), by = .(ID)])
+    FP$ID <- NULL
+    FP <- t(FP)
+    return(FP)
+  }
+  
+  reduce_matrix <- function(x,y){
+    x <- x[y!=0,y!=0]
+    return(x)
+  }
+  
+  refill_matrix <- function(x,y){
+    id <- 1:length(y)
+    id <- id[y!=0]
+    filled <- matrix(0,length(y),length(y))
+    filled[id,id] <- x
+    rownames(filled) <- names(y)
+    return(filled)
+  }
+  
   ##########################################################################
   # Make intitial settings
   ##########################################################################
@@ -29,28 +61,21 @@ FAO_MRIO_4b_footprints <- function(...){
   # aggregate RoW
   Prod$Country[! Prod$Country.Code %in% regions$Country.Code] <- "RoW"
   Prod$Country.Code[! Prod$Country.Code %in% regions$Country.Code] <- 999
-  # # test speed (it's faster to use pipes)
-  # system.time(a <- Prod %>% dplyr::group_by(Country, Item, Year, Unit) %>% dplyr:: summarise(Value = sum(Value)))
-  # system.time(b <- aggregate(Value ~ Country + Item + Year + Unit, Prod, sum))
-  # a %>% filter(Country == "RoW", Item == "Abaca", Year == 1961)
-  # b %>% filter(Country == "RoW", Item == "Abaca", Year == 1961)
+
   Prod <- as.data.frame(Prod %>% dplyr::group_by(Country.Code, Country, Item.Code, Item, Element, Year, Unit) %>% 
-                          dplyr:: summarise(Value = sum(Value)))
+                          dplyr::summarise(Value = sum(Value)))
   Prod$ID <- paste(Prod$Country.Code,Prod$Item.Code,sep="_")
-  
   
   ##########################################################################
   # Start loop for a series of years
   ##########################################################################
-  # year=1986
-  year=2011
-  for(year in 1986:2013){
+  for(year in years){
     print(year)
+    
     #-------------------------------------------------------------------------
     # Read data
     #-------------------------------------------------------------------------
-    # h5ls(paste0("FABIO matlab/",year,"_L.mat"))
-    L <- rhdf5::h5read(paste0("./FABIO matlab/",year,"_L.mat"), "L")
+    load(file=paste0("./data/yearly/",year,"_L.RData"))
     load(file=paste0("./data/yearly/",year,"_Z.RData"))
     load(file=paste0("./data/yearly/",year,"_Y.RData"))
     Landuse <- Prod[Prod$Unit=="ha" & Prod$Year==year,]
@@ -71,7 +96,7 @@ FAO_MRIO_4b_footprints <- function(...){
                       Com.Code = rep(items$Com.Code, nrreg),
                       Group = rep(items$Group, nrreg),
                       Value = 0)
-    # ext$Value[!items$Group=="Primary crops"] <- 0
+
     ext$ID <- paste(ext$Country.Code,ext$Item.Code,sep="_")
     ext$Value <- Landuse$Value[match(ext$ID,Landuse$ID)]
     ext$Value[!is.finite(ext$Value)] <- 0
@@ -83,17 +108,18 @@ FAO_MRIO_4b_footprints <- function(...){
     MP <- as.vector(ext$Value) / x
     MP[!is.finite(MP)] <- 0
     MP <- MP * L   # is identical with L * MP
+    MP <- reduce_matrix(MP,x)
     rm(L); gc()
-    save(MP, file=paste0("./data/yearly/",year,"_MP.RData"))
-    
+
     
     #-------------------------------------------------------------------------
     # Calculate Footprints
     #-------------------------------------------------------------------------
-    load(file=paste0("data/yearly/",year,"_MP.RData"))
-    load(file=paste0("data/yearly/",year,"_Y.RData"))
     regions_selected <- utils::read.csv(file="Regions_Footprint.csv", header=TRUE, sep=";")
-    regions_selected <- regions_selected[regions_selected$Continent=="EU",]
+    
+    if (regions_select != "all"){
+      regions_selected <- regions_selected[regions_selected$Continent %in% regions_select,]
+    }
     
     FP_region <- list()
     
@@ -103,29 +129,18 @@ FAO_MRIO_4b_footprints <- function(...){
       FP_fd <- list()
       # fd=1
       for(fd in 1:4){
-        # define final demand
-        Yreg <- Y[,(4*region-4+fd)]
         
-        # Calculate Footprint (MP * FD)
-        FP <- as.data.table((t(MP) * Yreg))
-        FP$ID <- items$Com.Code
-        FP <- as.data.frame(FP[, lapply(.SD, sum), by = .(ID)])
-        FP$ID <- NULL
-        FP <- t(FP)
-        FP_fd[[fd]] <- FP
+        FP_fd[[fd]] <- footprint(region = region, fd = fd, output = x)
         
-        rm(FP_AB); gc()
       }
       FP_region[[region]] <- FP_fd
       rm(FP_fd); gc()
     }
     
-    save(FP_region, file=paste0("results/",year,"_FP_results_selected.RData"))
-    
     # load(file=paste0("results/",year,"_FP_results_all.RData"))
     # load(file=paste0("results/",year,"_FP_results_selected.RData"))
     
-    # Rearrange results A as list
+    # Rearrange results as a list
     fd_categories <- c("1_Food","2_OtherUses","3_StockVariation","4_Balancing")
     FP <- data.table()
     # region=9
@@ -133,7 +148,12 @@ FAO_MRIO_4b_footprints <- function(...){
       print(paste("region",region))
       # fd = 1
       for(fd in 1:4){
-        f <- as.data.table(FP_region[[region]][[fd]][["A"]])
+        f <- as.data.table(FP_region[[region]][[fd]])
+        
+        filled <- matrix(0,length(x),ncol(f))
+        filled[x!=0,] <- as.matrix(f)
+        f <- as.data.frame(filled)
+        
         colnames(f) <- as.character(items$Com.Code)
         f$From.Country.Code <- regions$Country.Code
         f$From.Country <- regions$Country
@@ -141,49 +161,24 @@ FAO_MRIO_4b_footprints <- function(...){
         f <- reshape2::melt(f, id.vars = c("From.Country.Code","From.Country","From.ISO"), variable.name = "Com.Code")
         # f <- reshape2::melt(f, id.vars = "From.Country.Code")
         f$fd <- fd_categories[fd]
-        f$Country.Nr <- region
-        
+        f$Country_Nr <- region
+        f <- f[f$value!=0,]
         FP <- rbind(FP,f)
       }
     }
     
     FP <- reshape2::dcast(FP, ... ~ fd, value.var = "value", fun.aggregate = sum)
-    FP <- FP[rowSums(FP[,6:9])>0]
-    FP$Country <- regions_selected$Country[match(FP$Country.Nr,regions_selected$Nr)]
-    FP$ISO <- regions_selected$ISO[match(FP$Country.Nr,regions_selected$Nr)]
-    FP$Country.Nr <- NULL
-    data.table::fwrite(FP, file=paste0("results/",year,"_FP_selected_A.csv"), sep=";")
+    # FP <- FP[rowSums(FP[,6:8])>0]
+    FP$Country <- regions_selected$Country[match(FP$Country_Nr,regions_selected$Nr)]
+    FP$ISO <- regions_selected$ISO[match(FP$Country_Nr,regions_selected$Nr)]
+    FP$Country_Nr <- NULL
+    data.table::fwrite(FP, file=paste0("results/",year,"_FP_selected.csv"), sep=";")
     # write.xlsx(FP, file=paste0("results/",year,"_FP_selected_A.xlsx"), sheetName = "Biomass (tonnes)", row.names = F)
     
-    # Rearrange results B as list
-    fd_categories <- c("1_Food","2_OtherUses","3_StockVariation","4_Balancing")
-    FP <- data.table()
-    # region=9
-    for(region in regions_selected$Nr){
-      print(paste("region",region))
-      # fd = 1
-      for(fd in 1:4){
-        f <- as.data.table(FP_region[[region]][[fd]][["B"]])
-        colnames(f) <- as.character(items$Com.Code)
-        f$From.Com.Code <- items$Com.Code
-        f$From.Item <- items$Item
-        f <- reshape2::melt(f, id.vars = c("From.Com.Code","From.Item"), variable.name = "Com.Code")
-        f$fd <- fd_categories[fd]
-        f$Country.Nr <- region
-        
-        FP <- rbind(FP,f)
-      }
-    }
-    
-    FP <- reshape2::dcast(FP, ... ~ fd, value.var = "value", fun.aggregate = sum)
-    FP <- FP[rowSums(FP[,4:7])>0]
-    FP$Country <- regions_selected$Country[match(FP$Country.Nr,regions_selected$Nr)]
-    FP$ISO <- regions_selected$ISO[match(FP$Country.Nr,regions_selected$Nr)]
-    FP$Country.Nr <- NULL
-    data.table::fwrite(FP, file=paste0("results/",year,"_FP_selected_B.csv"), sep=";")
-    # write.xlsx(FP, file=paste0("results/",year,"_FP_selected_B.xlsx"), sheetName = "Biomass (tonnes)", row.names = F)
-    
   }
+  
+  
+  #setwd(current_wd)
   
   
 }
