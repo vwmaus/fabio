@@ -1,4 +1,4 @@
-#' @title Forestry and Agriculture Biomass Input-Output Tables
+#' @title Food and Agriculture Biomass Input-Output Tables
 #' @name fabio-package
 #' @aliases fabio
 #' @author Martin Bruckner, \email{martin.bruckner@@wu.ac.at}
